@@ -1,0 +1,97 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Analytics Dashboard</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:#0f0f23;color:#e0e0e0;min-height:100vh}
+.ob{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:1000;display:flex;justify-content:center;align-items:center}.ob.hide{display:none}
+.oc{background:#1a1a3e;border-radius:20px;padding:40px;max-width:500px;width:90%;text-align:center}
+.oc h2{color:#00cec9;font-size:28px;margin-bottom:8px}.oc .sub{color:#888;font-size:14px}
+.stps{margin:25px 0;text-align:left;display:flex;flex-direction:column;gap:18px}
+.st{display:flex;gap:14px;align-items:flex-start}.st .n{width:32px;height:32px;border-radius:50%;background:#00cec9;color:#000;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.st h4{font-size:14px;margin-bottom:2px}.st p{font-size:12px;color:#888;line-height:1.5}
+.oc button{padding:14px 40px;border:none;border-radius:10px;background:#00cec9;color:#000;font-size:16px;font-weight:700;cursor:pointer}
+.oc .sk{color:#555;font-size:12px;cursor:pointer;margin-top:12px;display:inline-block}
+.app{display:none;max-width:1100px;margin:0 auto;padding:20px}.app.show{display:block}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+h1{font-size:22px}h1 span{background:linear-gradient(90deg,#00cec9,#00b894);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.top .period{display:flex;gap:6px}
+.top .period button{padding:6px 14px;border:1px solid #333;border-radius:6px;background:transparent;color:#888;cursor:pointer;font-size:12px}
+.top .period button.active{background:#00cec9;color:#000;border-color:#00cec9}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}
+.stat{background:#1a1a3e;border-radius:14px;padding:18px;border:1px solid #2a2a4e}
+.stat .label{font-size:12px;color:#666;margin-bottom:5px}
+.stat .val{font-size:28px;font-weight:700}
+.stat .change{font-size:11px;margin-top:5px}
+.stat .change.up{color:#00b894}.stat .change.down{color:#ff6b6b}
+.charts{display:grid;grid-template-columns:2fr 1fr;gap:15px;margin-bottom:20px}
+.chart{background:#1a1a3e;border-radius:14px;padding:20px;border:1px solid #2a2a4e}
+.chart h3{font-size:14px;color:#888;margin-bottom:15px}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:200px;padding-top:10px}
+.bar-chart .bar{flex:1;border-radius:6px 6px 0 0;position:relative;cursor:pointer;transition:.2s;min-width:20px}
+.bar-chart .bar:hover{opacity:0.8}
+.bar-chart .bar .tooltip{display:none;position:absolute;top:-30px;left:50%;transform:translateX(-50%);background:#333;padding:4px 8px;border-radius:4px;font-size:11px;white-space:nowrap}
+.bar-chart .bar:hover .tooltip{display:block}
+.donut-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px}
+canvas{max-width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;justify-content:center}
+.legend .item{display:flex;align-items:center;gap:5px;font-size:11px;color:#888}
+.legend .dot{width:8px;height:8px;border-radius:50%}
+.table-wrap{background:#1a1a3e;border-radius:14px;padding:20px;border:1px solid #2a2a4e}
+.table-wrap h3{font-size:14px;color:#888;margin-bottom:12px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px;font-size:12px;color:#666;border-bottom:1px solid #2a2a4e}
+td{padding:10px;font-size:13px;border-bottom:1px solid #0f0f23}
+td .badge{padding:3px 8px;border-radius:10px;font-size:11px}
+.badge.green{background:#1a3a2f;color:#00b894}.badge.red{background:#3a1e2e;color:#ff6b6b}.badge.blue{background:#1a2a3e;color:#74b9ff}
+@media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr)}.charts{grid-template-columns:1fr}}
+</style></head><body>
+<div class="ob" id="ob"><div class="oc">
+<h2>Analytics Dashboard</h2><p class="sub">Visualize your data beautifully</p>
+<div class="stps">
+<div class="st"><div class="n">1</div><div><h4>View Key Metrics</h4><p>The top cards show total visitors, revenue, conversions, and bounce rate with trend indicators.</p></div></div>
+<div class="st"><div class="n">2</div><div><h4>Analyze Charts</h4><p>Bar chart shows weekly traffic. Donut chart shows traffic sources. Hover for details.</p></div></div>
+<div class="st"><div class="n">3</div><div><h4>Switch Time Period</h4><p>Click Week, Month, or Year buttons to change the data range. All charts update instantly.</p></div></div>
+</div>
+<button onclick="start()">Open Dashboard</button>
+<div class="sk" onclick="start()">Skip</div>
+</div></div>
+<div class="app" id="app">
+<div class="top"><h1><span>Analytics Dashboard</span></h1><div class="period"><button class="active" onclick="setPeriod('week',this)">Week</button><button onclick="setPeriod('month',this)">Month</button><button onclick="setPeriod('year',this)">Year</button></div></div>
+<div class="stats" id="stats"></div>
+<div class="charts">
+<div class="chart"><h3>Traffic Overview</h3><div class="bar-chart" id="barChart"></div></div>
+<div class="chart"><h3>Traffic Sources</h3><div class="donut-wrap"><canvas id="donut" width="180" height="180"></canvas><div class="legend" id="legend"></div></div></div>
+</div>
+<div class="table-wrap"><h3>Recent Activity</h3><table><thead><tr><th>Page</th><th>Views</th><th>Duration</th><th>Status</th></tr></thead><tbody id="tbody"></tbody></table>
+</div></div>
+<script>
+var data={week:{visitors:'12,847',revenue:'$4,280',conversions:'3.2%',bounce:'42%',vChange:'+12%',rChange:'+8%',cChange:'+0.5%',bChange:'-3%',bars:[420,680,540,890,720,950,610],labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun']},
+month:{visitors:'48,291',revenue:'$16,750',conversions:'3.8%',bounce:'38%',vChange:'+18%',rChange:'+22%',cChange:'+0.8%',bChange:'-5%',bars:[3200,4100,3800,4500,4200,5100,3900,4800,4100,3600,4400,4700],labels:['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12']},
+year:{visitors:'582,104',revenue:'$198,420',conversions:'4.1%',bounce:'35%',vChange:'+24%',rChange:'+31%',cChange:'+1.2%',bChange:'-8%',bars:[38000,42000,45000,51000,48000,55000,52000,58000,49000,53000,61000,59000],labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']}};
+var sources=[{name:'Direct',val:35,color:'#00cec9'},{name:'Organic',val:28,color:'#00b894'},{name:'Social',val:20,color:'#a855f7'},{name:'Referral',val:12,color:'#feca57'},{name:'Email',val:5,color:'#ff6b6b'}];
+var pages=[{page:'/home',views:'4,281',dur:'2m 34s',status:'green'},{page:'/products',views:'2,847',dur:'3m 12s',status:'green'},{page:'/about',views:'1,542',dur:'1m 48s',status:'blue'},{page:'/blog/post-1',views:'1,203',dur:'4m 05s',status:'green'},{page:'/contact',views:'876',dur:'0m 52s',status:'red'}];
+function start(){document.getElementById('ob').classList.add('hide');document.getElementById('app').classList.add('show');localStorage.setItem('ad_seen','1');renderAll('week')}
+if(localStorage.getItem('ad_seen')){document.getElementById('ob').classList.add('hide');document.getElementById('app').classList.add('show')}
+function setPeriod(p,btn){document.querySelectorAll('.period button').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');renderAll(p)}
+function renderAll(p){
+var d=data[p];
+document.getElementById('stats').innerHTML=
+'<div class="stat"><div class="label">Total Visitors</div><div class="val">'+d.visitors+'</div><div class="change up">'+d.vChange+' vs last</div></div>'+
+'<div class="stat"><div class="label">Revenue</div><div class="val" style="color:#00cec9">'+d.revenue+'</div><div class="change up">'+d.rChange+' vs last</div></div>'+
+'<div class="stat"><div class="label">Conversion Rate</div><div class="val" style="color:#a855f7">'+d.conversions+'</div><div class="change up">'+d.cChange+' vs last</div></div>'+
+'<div class="stat"><div class="label">Bounce Rate</div><div class="val" style="color:#feca57">'+d.bounce+'</div><div class="change down">'+d.bChange+' vs last</div></div>';
+var max=Math.max.apply(null,d.bars);
+document.getElementById('barChart').innerHTML=d.bars.map(function(v,i){
+var h=Math.round(v/max*180);var colors=['#00cec9','#00b894','#a855f7','#74b9ff','#fd79a8','#feca57','#e17055'];
+return '<div class="bar" style="height:'+h+'px;background:'+colors[i%colors.length]+'"><div class="tooltip">'+d.labels[i]+': '+v.toLocaleString()+'</div></div>'}).join('');
+drawDonut();
+document.getElementById('tbody').innerHTML=pages.map(function(p){
+return '<tr><td>'+p.page+'</td><td>'+p.views+'</td><td>'+p.dur+'</td><td><span class="badge '+p.status+'">'+(p.status==='green'?'Good':p.status==='blue'?'Normal':'High Bounce')+'</span></td></tr>'}).join('');
+}
+function drawDonut(){
+var c=document.getElementById('donut'),ctx=c.getContext('2d');var cx=90,cy=90,r=70,inner=45;
+ctx.clearRect(0,0,180,180);var start=-Math.PI/2;
+sources.forEach(function(s){var angle=s.val/100*2*Math.PI;ctx.beginPath();ctx.arc(cx,cy,r,start,start+angle);ctx.arc(cx,cy,inner,start+angle,start,true);ctx.closePath();ctx.fillStyle=s.color;ctx.fill();start+=angle});
+ctx.fillStyle='#1a1a3e';ctx.beginPath();ctx.arc(cx,cy,inner-1,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='#fff';ctx.font='bold 16px Segoe UI';ctx.textAlign='center';ctx.fillText('100%',cx,cy+5);
+document.getElementById('legend').innerHTML=sources.map(function(s){return '<div class="item"><div class="dot" style="background:'+s.color+'"></div>'+s.name+' '+s.val+'%</div>'}).join('');
+}
+renderAll('week');
+</script></body></html>
